@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/badge/Version-1.0.1-green.svg)
+![Version](https://img.shields.io/badge/Version-1.0.2-green.svg)
 
 Like this project? Consider tipping me: [https://github.com/sponsors/bartobri](https://github.com/sponsors/bartobri)
 
@@ -116,7 +116,8 @@ characters. Other space characters such as tabs and newlines will not be masked.
 
 Set the foreground color of the decrypted text to the color
 specified. Valid options are white, yellow, black, magenta, blue, green,
-or red. This is blue by default.
+red, cyan, or any color value in hex string format (i.e. #FF1234).
+This is blue by default.
 
 `-c`
 

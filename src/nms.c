@@ -13,7 +13,7 @@
 #include "input.h"
 #include "error.h"
 
-#define VERSION "1.0.1"
+#define VERSION "1.0.2"
 
 int main(int argc, char *argv[])
 {
