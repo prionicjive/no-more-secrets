@@ -24,33 +24,33 @@
 #endif
 
 // Macros for VT100 codes
-#define CLEAR_SCR()          printf("\033[2J")           // Clear Screen
-#define CURSOR_HOME()        printf("\033[H")            // Move cursor to home position (0,0)
-#define CURSOR_MOVE(y,x)     printf("\033[%i;%iH", y, x) // Move cursor to x,y
-#define BEEP()               printf("\a");               // terminal bell
-#define BOLD()               printf("\033[1m")           // Cursor bold
-#define FOREGROUND_COLOR(x)  printf("\033[3%im", x)      // Set foreground color
-#define CLEAR_ATTR()         printf("\033[0m")           // Clear bold/color attributes
-#define SCREEN_SAVE()        printf("\033[?47h")         // Save screen display
-#define SCREEN_RESTORE()     printf("\033[?47l")         // Restore screen to previously saved state
-#define CURSOR_SAVE()        printf("\033[s")            // Save cursor position
-#define CURSOR_RESTORE()     printf("\033[u")            // Restore cursor position
-#define CURSOR_HIDE()        printf("\033[?25l")         // Hide cursor
-#define CURSOR_SHOW()        printf("\033[?25h")         // Unhide cursor
+#define CLEAR_SCR()             printf("\033[2J")           // Clear Screen
+#define CURSOR_HOME()           printf("\033[H")            // Move cursor to home position (0,0)
+#define CURSOR_MOVE(y,x)        printf("\033[%i;%iH", y, x) // Move cursor to x,y
+#define BEEP()                  printf("\a");               // terminal bell
+#define BOLD()                  printf("\033[1m")           // Cursor bold
+#define FOREGROUND_COLOR(r,g,b) printf("\033[38;2;%d;%d;%dm", r, g, b) // Set foreground color (24-bit RGB)
+#define CLEAR_ATTR()            printf("\033[0m")           // Clear bold/color attributes
+#define SCREEN_SAVE()           printf("\033[?47h")         // Save screen display
+#define SCREEN_RESTORE()        printf("\033[?47l")         // Restore screen to previously saved state
+#define CURSOR_SAVE()           printf("\033[s")            // Save cursor position
+#define CURSOR_RESTORE()        printf("\033[u")            // Restore cursor position
+#define CURSOR_HIDE()           printf("\033[?25l")         // Hide cursor
+#define CURSOR_SHOW()           printf("\033[?25h")         // Unhide cursor
 
-// Color identifiers
-#define COLOR_BLACK   0
-#define COLOR_RED     1
-#define COLOR_GREEN   2
-#define COLOR_YELLOW  3
-#define COLOR_BLUE    4
-#define COLOR_MAGENTA 5
-#define COLOR_CYAN    6
-#define COLOR_WHITE   7
+// Color hex values (approximations of ANSI colors)
+#define COLOR_BLACK   "#000000"
+#define COLOR_RED     "#ff0000"
+#define COLOR_GREEN   "#00ff00"
+#define COLOR_YELLOW  "#ffff00"
+#define COLOR_BLUE    "#0000ff"
+#define COLOR_MAGENTA "#ff00ff"
+#define COLOR_CYAN    "#00ffff"
+#define COLOR_WHITE   "#ffffff"
 
 // Terminal IO settings
-static int clearScr          = 0;                     // clearScr flag
-static int foregroundColor   = COLOR_BLUE;            // Foreground color setting
+static int clearScr              = 0;                     // clearScr flag
+static char foregroundColor[8]   = COLOR_BLUE;            // Foreground color setting
 
 // Function prototypes
 static void nmstermio_set_terminal(int);
@@ -177,11 +177,13 @@ char nmstermio_get_char(void) {
  * string.
  */
 void nmstermio_print_reveal_string(char *s, int colorOn) {
+	int r, g, b;
 	
 	// Set bold and foreground color
 	BOLD();
 	if (colorOn) {
-		FOREGROUND_COLOR(foregroundColor);
+		sscanf(foregroundColor + 1, "%02x%02x%02x", &r, &g, &b);
+		FOREGROUND_COLOR(r, g, b);
 	}
 	
 	// print string
@@ -227,28 +229,30 @@ void nmstermio_set_clearscr(int s) {
 /*
  * Set the desired foreground color of the unencrypted characters as they
  * are revealed by nmstermio_print_reveal_string(). Valid arguments are
- * "white", "yellow", "magenta", "blue", "green", "red", and "cyan".
+ * "white", "yellow", "magenta", "blue", "green", "red", "cyan", or "#XXXXXX".
  */
 void nmstermio_set_foregroundcolor(char *c) {
 
-	if(strcmp("white", c) == 0)
-		foregroundColor =  COLOR_WHITE;
+	if (strlen(c) == 7 && strspn(c+1, "0123456789abcdefABCDEF") == 6)
+    	strcpy(foregroundColor, c);
+	else if(strcmp("white", c) == 0)
+		strcpy(foregroundColor, COLOR_WHITE);
 	else if(strcmp("yellow", c) == 0)
-		foregroundColor = COLOR_YELLOW;
+		strcpy(foregroundColor, COLOR_YELLOW);
 	else if(strcmp("black", c) == 0)
-		foregroundColor = COLOR_BLACK;
+		strcpy(foregroundColor, COLOR_BLACK);
 	else if(strcmp("magenta", c) == 0)
-		foregroundColor = COLOR_MAGENTA;
+		strcpy(foregroundColor, COLOR_MAGENTA);
 	else if(strcmp("blue", c) == 0)
-		foregroundColor = COLOR_BLUE;
+		strcpy(foregroundColor, COLOR_BLUE);
 	else if(strcmp("green", c) == 0)
-		foregroundColor = COLOR_GREEN;
+		strcpy(foregroundColor, COLOR_GREEN);
 	else if(strcmp("red", c) == 0)
-		foregroundColor = COLOR_RED;
+		strcpy(foregroundColor, COLOR_RED);
 	else if(strcmp("cyan", c) == 0)
-		foregroundColor = COLOR_CYAN;
+		strcpy(foregroundColor, COLOR_CYAN);
 	else
-		foregroundColor = COLOR_BLUE;
+		strcpy(foregroundColor, COLOR_BLUE);
 }
 
 /*
